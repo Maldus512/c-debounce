@@ -9,14 +9,14 @@
     { 0 }
 
 typedef enum {
-    KEY_NOTHING,          // Nothing has happened
-    KEY_PRESS,            // The button was pressed initially. Not repeated
-    KEY_PRESSING,         // the button is still pressed, repeated.
-    KEY_CLICK,            // The button was pressed for "click" time. Not repeated
-    KEY_LONGCLICK,        // The button was pressed for "longclick" time. Not repeated
-    KEY_LONGPRESSING,     // The button was kept pressed after a longclick event
-    KEY_RELEASE,          // The button was released after a click event (long or short)
-} keypad_event_t;
+    KEYPAD_EVENT_TAG_NOTHING,          // Nothing has happened
+    KEYPAD_EVENT_TAG_PRESS,            // The button was pressed initially. Not repeated
+    KEYPAD_EVENT_TAG_PRESSING,         // the button is still pressed, repeated.
+    KEYPAD_EVENT_TAG_CLICK,            // The button was pressed for "click" time. Not repeated
+    KEYPAD_EVENT_TAG_LONGCLICK,        // The button was pressed for "longclick" time. Not repeated
+    KEYPAD_EVENT_TAG_LONGPRESSING,     // The button was kept pressed after a longclick event
+    KEYPAD_EVENT_TAG_RELEASE,          // The button was released after a click event (long or short)
+} keypad_event_tag_t;
 
 
 // Struct containing information about the key
@@ -26,24 +26,24 @@ typedef struct {
 
     // Internal state, not to be handled outside
     struct {
-        unsigned long  time_state;
-        unsigned long  time_period;
-        uint8_t        value;
-        uint8_t        oldvalue;
-        uint8_t        ignore;
-        keypad_event_t lastevent;
+        unsigned long      time_state;
+        unsigned long      time_period;
+        uint8_t            value;
+        uint8_t            oldvalue;
+        uint8_t            ignore;
+        keypad_event_tag_t lastevent;
     } _state;
 
 } keypad_key_t;
 
 
 typedef struct {
-    int            code;
-    keypad_event_t event;
-} keypad_update_t;
+    keypad_event_tag_t tag;
+    int                code;
+} keypad_event_t;
 
-keypad_update_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned long longclick,
-                               unsigned long press_period, unsigned long timestamp, unsigned long bitvalue);
+keypad_event_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned long longclick,
+                              unsigned long press_period, unsigned long timestamp, unsigned long bitvalue);
 
 unsigned char keypad_get_key_state(keypad_key_t *key);
 void          keypad_reset_keys(keypad_key_t *keys);

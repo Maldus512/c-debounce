@@ -7,11 +7,11 @@ unsigned char keypad_get_key_state(keypad_key_t *key) {
     return key->_state.value;
 }
 
-keypad_update_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned long longclick,
-                               unsigned long press_period, unsigned long timestamp, unsigned long bitvalue) {
-    int             i = 0, found = -1;
-    keypad_key_t   *key;
-    keypad_update_t event = {0};
+keypad_event_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned long longclick,
+                              unsigned long press_period, unsigned long timestamp, unsigned long bitvalue) {
+    int            i = 0, found = -1;
+    keypad_key_t  *key;
+    keypad_event_t event = {0};
 
     while (keys[i].bitvalue) {
         // If a key is found
@@ -29,7 +29,8 @@ keypad_update_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned
             break;
         }
         // If the last event was a click and the key is not pressed anymore
-        else if (keys[i]._state.lastevent != KEY_RELEASE && keys[i]._state.lastevent != KEY_NOTHING) {
+        else if (keys[i]._state.lastevent != KEYPAD_EVENT_TAG_RELEASE &&
+                 keys[i]._state.lastevent != KEYPAD_EVENT_TAG_NOTHING) {
             found      = i;
             event.code = keys[i].code;
             break;
@@ -43,28 +44,30 @@ keypad_update_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned
     key = &keys[found];
 
     if (key->_state.value == key->_state.oldvalue && !key->_state.ignore) {
-        if (key->_state.lastevent == KEY_PRESS && key->_state.value == 1 &&
+        if (key->_state.lastevent == KEYPAD_EVENT_TAG_PRESS && key->_state.value == 1 &&
             is_strictly_expired(key->_state.time_state, timestamp, click)) {
-            event.event             = KEY_CLICK;
+            event.tag               = KEYPAD_EVENT_TAG_CLICK;
             key->_state.time_period = timestamp;
-            key->_state.lastevent   = event.event;
-        } else if ((key->_state.lastevent != KEY_RELEASE || key->_state.lastevent == KEY_NOTHING) &&
+            key->_state.lastevent   = event.tag;
+        } else if ((key->_state.lastevent != KEYPAD_EVENT_TAG_RELEASE ||
+                    key->_state.lastevent == KEYPAD_EVENT_TAG_NOTHING) &&
                    key->_state.value == 0 && is_strictly_expired(key->_state.time_state, timestamp, click)) {
-            event.event           = KEY_RELEASE;
-            key->_state.lastevent = event.event;
-        } else if ((key->_state.lastevent == KEY_CLICK || key->_state.lastevent == KEY_PRESS) &&
+            event.tag             = KEYPAD_EVENT_TAG_RELEASE;
+            key->_state.lastevent = event.tag;
+        } else if ((key->_state.lastevent == KEYPAD_EVENT_TAG_CLICK ||
+                    key->_state.lastevent == KEYPAD_EVENT_TAG_PRESS) &&
                    is_strictly_expired(key->_state.time_state, timestamp, longclick)) {
-            event.event             = KEY_LONGCLICK;
+            event.tag               = KEYPAD_EVENT_TAG_LONGCLICK;
             key->_state.time_state  = timestamp;
             key->_state.time_period = timestamp;
-            key->_state.lastevent   = event.event;
-        } else if (key->_state.lastevent == KEY_LONGCLICK && (key->_state.value == 1) &&
+            key->_state.lastevent   = event.tag;
+        } else if (key->_state.lastevent == KEYPAD_EVENT_TAG_LONGCLICK && (key->_state.value == 1) &&
                    is_strictly_expired(key->_state.time_period, timestamp, press_period)) {
-            event.event             = KEY_LONGPRESSING;
+            event.tag               = KEYPAD_EVENT_TAG_LONGPRESSING;
             key->_state.time_period = timestamp;
-        } else if (key->_state.lastevent == KEY_CLICK && (key->_state.value == 1) &&
+        } else if (key->_state.lastevent == KEYPAD_EVENT_TAG_CLICK && (key->_state.value == 1) &&
                    is_strictly_expired(key->_state.time_period, timestamp, press_period)) {
-            event.event             = KEY_PRESSING;
+            event.tag               = KEYPAD_EVENT_TAG_PRESSING;
             key->_state.time_period = timestamp;
         }
     } else if (key->_state.value != key->_state.oldvalue) {
@@ -73,11 +76,11 @@ keypad_update_t keypad_routine(keypad_key_t *keys, unsigned long click, unsigned
         key->_state.time_state = timestamp;
 
         if (key->_state.value) {
-            event.event           = KEY_PRESS;
-            key->_state.lastevent = event.event;
-        } else if (key->_state.lastevent == KEY_PRESS) {
-            event.event           = KEY_RELEASE;
-            key->_state.lastevent = event.event;
+            event.tag             = KEYPAD_EVENT_TAG_PRESS;
+            key->_state.lastevent = event.tag;
+        } else if (key->_state.lastevent == KEYPAD_EVENT_TAG_PRESS) {
+            event.tag             = KEYPAD_EVENT_TAG_RELEASE;
+            key->_state.lastevent = event.tag;
         }
     }
 
@@ -89,7 +92,7 @@ void keypad_reset_keys(keypad_key_t *keys) {
     while (keys[i].bitvalue) {
         keys[i]._state.time_state  = 0;
         keys[i]._state.time_period = 0;
-        keys[i]._state.lastevent   = KEY_NOTHING;
+        keys[i]._state.lastevent   = KEYPAD_EVENT_TAG_NOTHING;
         keys[i]._state.oldvalue    = 0;
         keys[i]._state.value       = 0;
         keys[i]._state.ignore      = 1;
