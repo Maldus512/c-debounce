@@ -19,10 +19,11 @@ int pulse_filter(pulse_filter_t *filter, unsigned int input, int debounce) {
         if (NTH(input, i) == NTH(filter->old_input, i)) {
             filter->filters[i] = 0;
         } else {
-            if (filter->filters[i] > 0)
+            if (filter->filters[i] > 0) {
                 filter->filters[i]--;
-            else
-                filter->filters[i] = debounce;
+            } else {
+                filter->filters[i] = (unsigned int)debounce;
+            }
 
             if (filter->filters[i] == 0) {
                 switch (filter->type) {

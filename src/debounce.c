@@ -1,7 +1,7 @@
 #include "debounce.h"
 
 #define BOOL(x)            ((x) > 0)
-#define SET_NTH(x, i, val) ((x & (~((unsigned int)(1 << i)))) | BOOL(val) << i)
+#define SET_NTH(x, i, val) ((x & (~((unsigned int)(1 << i)))) | ((unsigned int)BOOL(val) << i))
 
 void debounce_filter_init(debounce_filter_t *filter) {
     int i;
@@ -20,7 +20,7 @@ void debounce_filter_set(debounce_filter_t *filter, unsigned int set) {
 
 unsigned int debounce_filter(debounce_filter_t *filter, unsigned int input, int debounce) {
     unsigned int change = 0;
-    size_t i            = 0;
+    size_t       i      = 0;
 
     for (i = 0; i < NUM_INPUTS; i++)
         change |= debounce_filter_single(filter, NTH(input, i), i, debounce);
@@ -34,10 +34,11 @@ unsigned int debounce_filter_single(debounce_filter_t *filter, unsigned int inpu
     if (BOOL(input) == NTH(filter->old_input, i)) {
         filter->debounce_count[i] = 0;
     } else {
-        if (filter->debounce_count[i] > 0)
+        if (filter->debounce_count[i] > 0) {
             filter->debounce_count[i]--;
-        else
-            filter->debounce_count[i] = debounce;
+        } else {
+            filter->debounce_count[i] = (unsigned int)debounce;
+        }
 
         if (filter->debounce_count[i] == 0) {
             filter->buffered  = SET_NTH(filter->buffered, i, input);
