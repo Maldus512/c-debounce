@@ -12,17 +12,22 @@ void pulse_filter_init(pulse_filter_t *filter, pulse_type_t type, unsigned int i
         pulse_clear(filter, i);
 }
 
-int pulse_filter(pulse_filter_t *filter, unsigned int input, int debounce) {
+int pulse_filter(pulse_filter_t *filter, unsigned int input, unsigned int debounce) {
     int i = 0, change = 0;
+
+    if (debounce == 0) {
+        debounce = 1;
+    }
 
     for (i = 0; i < PULSE_NUM; i++) {
         if (NTH(input, i) == NTH(filter->old_input, i)) {
             filter->filters[i] = 0;
         } else {
-            if (filter->filters[i] > 0)
+            if (filter->filters[i] > 0) {
                 filter->filters[i]--;
-            else
-                filter->filters[i] = debounce;
+            } else {
+                filter->filters[i] = debounce - 1;
+            }
 
             if (filter->filters[i] == 0) {
                 switch (filter->type) {

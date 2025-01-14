@@ -72,6 +72,6 @@ void pulse_filter_init(pulse_filter_t *filter, pulse_type_t type, unsigned int i
  * value to change.
  *  return: returns 1 if there was a change
  */
-int pulse_filter(pulse_filter_t *filter, unsigned int input, int debounce);
+int pulse_filter(pulse_filter_t *filter, unsigned int input, unsigned int debounce);
 
 #endif

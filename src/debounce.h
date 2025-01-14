@@ -52,9 +52,9 @@ void debounce_filter_init(debounce_filter_t *filter);
  * value to change.
  *  return: returns 1 if there was a change
  */
-unsigned int debounce_filter(debounce_filter_t *filter, unsigned int input, int debounce);
+unsigned int debounce_filter(debounce_filter_t *filter, unsigned int input, unsigned int debounce);
 
-unsigned int debounce_filter_single(debounce_filter_t *filter, unsigned int input, size_t i, int debounce);
+unsigned int debounce_filter_single(debounce_filter_t *filter, unsigned int input, size_t i, unsigned int debounce);
 
 /*
  *  Sets the saved value for all inputs. Useful to reset the reading.
