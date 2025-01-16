@@ -23,9 +23,10 @@ typedef struct {
  *  return: the number of pulses counted
  */
 static inline int pulse_count(pulse_filter_t *filter, int i) {
-    if (i < 0 || i >= PULSE_NUM)
+    if (i < 0 || i >= PULSE_NUM) {
         return -1;
-    return filter->count[i];
+    }
+    return (int)filter->count[i];
 }
 
 /*

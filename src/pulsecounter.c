@@ -26,7 +26,7 @@ int pulse_filter(pulse_filter_t *filter, unsigned int input, unsigned int deboun
             if (filter->filters[i] > 0) {
                 filter->filters[i]--;
             } else {
-                filter->filters[i] = debounce - 1;
+                filter->filters[i] = (unsigned int)(debounce-1);
             }
 
             if (filter->filters[i] == 0) {
